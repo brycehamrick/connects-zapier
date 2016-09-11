@@ -1,20 +1,20 @@
 // JavaScript Document
 
-jQuery(document).on("change keyup paste keydown","#myaddon_api_key", function(e) {
+jQuery(document).on("change keyup paste keydown","#zapier_api_key", function(e) {
 	var val = jQuery(this).val();
 	if( val !== "" )
-		jQuery("#auth-myaddon").removeAttr('disabled');
+		jQuery("#auth-zapier").removeAttr('disabled');
 	else
-		jQuery("#auth-myaddon").attr('disabled','true');
+		jQuery("#auth-zapier").attr('disabled','true');
 });
 
-jQuery(document).on( "click", "#auth-myaddon", function(e){
+jQuery(document).on( "click", "#auth-zapier", function(e){
 	e.preventDefault();
 	jQuery(".smile-absolute-loader").css('visibility','visible');
-	var myaddon_api_key = jQuery("#myaddon_api_key").val();
-	
-	var action = 'update_myaddon_authentication';
-	var data = {action:action,myaddon_api_key:myaddon_api_key};
+	var zapier_api_key = jQuery("#zapier_api_key").val();
+
+	var action = 'update_zapier_authentication';
+	var data = {action:action,zapier_api_key:zapier_api_key};
 	jQuery.ajax({
 		url: ajaxurl,
 		data: data,
@@ -24,12 +24,12 @@ jQuery(document).on( "click", "#auth-myaddon", function(e){
 			if(result.status == "success" ){
 				jQuery(".bsf-cnlist-mailer-help").hide();
 				jQuery("#save-btn").removeAttr('disabled');
-				jQuery("#myaddon_api_key").closest('.bsf-cnlist-form-row').hide();
-				jQuery("#auth-myaddon").closest('.bsf-cnlist-form-row').hide();
-				jQuery(".myaddon-list").html(result.message);
+				jQuery("#zapier_api_key").closest('.bsf-cnlist-form-row').hide();
+				jQuery("#auth-zapier").closest('.bsf-cnlist-form-row').hide();
+				jQuery(".zapier-list").html(result.message);
 
 			} else {
-				jQuery(".myaddon-list").html('<span class="bsf-mailer-success">'+result.message+'</span>');
+				jQuery(".zapier-list").html('<span class="bsf-mailer-success">'+result.message+'</span>');
 			}
 			jQuery(".smile-absolute-loader").css('visibility','hidden');
 		}
@@ -37,10 +37,10 @@ jQuery(document).on( "click", "#auth-myaddon", function(e){
 	e.preventDefault();
 });
 
-jQuery(document).on( "click", "#disconnect-myaddon", function(){
-															
-	if(confirm("Are you sure? If you disconnect, your previous campaigns syncing with myaddon will be disconnected as well.")) {
-		var action = 'disconnect_myaddon';
+jQuery(document).on( "click", "#disconnect-zapier", function(){
+
+	if(confirm("Are you sure? If you disconnect, your previous campaigns syncing with zapier will be disconnected as well.")) {
+		var action = 'disconnect_zapier';
 		var data = {action:action};
 		jQuery(".smile-absolute-loader").css('visibility','visible');
 		jQuery.ajax({
@@ -53,10 +53,10 @@ jQuery(document).on( "click", "#disconnect-myaddon", function(){
 				jQuery("#save-btn").attr('disabled','true');
 				if(result.message == "disconnected" ){
 
-					jQuery("#myaddon_api_key").val('');
-					jQuery(".myaddon-list").html('');
-					jQuery("#disconnect-myaddon").replaceWith('<button id="auth-myaddon" class="button button-secondary auth-button" disabled="true">Authenticate myaddon</button><span class="spinner" style="float: none;"></span>');
-					jQuery("#auth-myaddon").attr('disabled','true');
+					jQuery("#zapier_api_key").val('');
+					jQuery(".zapier-list").html('');
+					jQuery("#disconnect-zapier").replaceWith('<button id="auth-zapier" class="button button-secondary auth-button" disabled="true">Authenticate zapier</button><span class="spinner" style="float: none;"></span>');
+					jQuery("#auth-zapier").attr('disabled','true');
 				}
 
 				jQuery('.bsf-cnlist-form-row').fadeIn('300');

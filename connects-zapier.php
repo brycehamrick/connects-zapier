@@ -1,27 +1,26 @@
 <?php
 /**
-* Plugin Name: Connects - MyAddon Addon
-* Plugin URI: 
-* Description: Use this plugin to integrate MyAddon with Connects..
-* Version: 1.0
-* Author: Your Name
-* Author URI: https://www.example.com/
-* License:
+* Plugin Name: Connects - Zapier Addon
+* Plugin URI:
+* Description: Use this plugin to integrate Zapier with Connects..
+* Version: 0.0.1
+* Author: Bryce Hamrick
+* Author URI: https://bhamrick.com/
 */
 
-if(!class_exists('Smile_Mailer_Myaddon')){
-	class Smile_Mailer_Myaddon{
+if(!class_exists('Smile_Mailer_Zapier')){
+	class Smile_Mailer_Zapier{
 
-	
+
 		//Class variables
 		private $slug;
 		private $setting;
-		
+
 		/*
 		 * Function Name: __construct
 		 * Function Description: Constructor
 		 */
-		
+
 		function __construct(){
 			add_action( 'admin_init', array( $this, 'enqueue_scripts' ) );
 
@@ -29,32 +28,32 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 			require_once('lib/api.class.php');
 
 			// Actions to perform get lists, add subscriber, disconnect mailer, etc.
-			add_action( 'wp_ajax_get_myaddon_data', array($this,'get_myaddon_data' ));
-			add_action( 'wp_ajax_update_myaddon_authentication', array($this,'update_myaddon_authentication' ));
-			add_action( 'wp_ajax_disconnect_myaddon', array($this,'disconnect_myaddon' ));
-			add_action( 'wp_ajax_myaddon_add_subscriber', array($this,'myaddon_add_subscriber' ));
-			add_action( 'wp_ajax_nopriv_myaddon_add_subscriber', array($this,'myaddon_add_subscriber' ));
+			add_action( 'wp_ajax_get_zapier_data', array($this,'get_zapier_data' ));
+			add_action( 'wp_ajax_update_zapier_authentication', array($this,'update_zapier_authentication' ));
+			add_action( 'wp_ajax_disconnect_zapier', array($this,'disconnect_zapier' ));
+			add_action( 'wp_ajax_zapier_add_subscriber', array($this,'zapier_add_subscriber' ));
+			add_action( 'wp_ajax_nopriv_zapier_add_subscriber', array($this,'zapier_add_subscriber' ));
 
 			// Settings for mailer
 			$this->setting  = array(
-				'name' => 'MyAddon', //Display name
-				'parameters' => array( 'api_key' ), // Credentials input parameters
-				'where_to_find_url' => 'https://app.myaddon.com/account/api_keys',
+				'name' => 'Zapier', //Display name
+				'parameters' => array( 'webook_url' ), // Credentials input parameters
+				'where_to_find_url' => 'https://zapier.com/',
 				'logo_url' => plugins_url('images/logo.png', __FILE__)
 			);
-			
+
 			// Mandatory to specify.
 			// See to it this slug matches the slug in all function names.
-			// Ex. myaddon => wp_ajax_update_myaddon_authentication
-			$this->slug = 'myaddon';
+			// Ex. zapier => wp_ajax_update_zapier_authentication
+			$this->slug = 'zapier';
 		}
-		
-		
+
+
 		/*
 		 * Function Name: enqueue_scripts
 		 * Function Description: Add custon scripts
 		 */
-		
+
 		function enqueue_scripts() {
 			if( function_exists( 'cp_register_addon' ) ) {
 				cp_register_addon( $this->slug, $this->setting );
@@ -77,32 +76,32 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 					echo $style;
 				}
 			}
-			
+
 		}
-		
+
 		/*
-		 * Function Name: get_myaddon_data
-		 * Function Description: Get MyAddon input fields
+		 * Function Name: get_zapier_data
+		 * Function Description: Get Zapier input fields
 		 */
-		 
-		function get_myaddon_data(){
+
+		function get_zapier_data(){
 			$isKeyChanged = false;
 			$connected = false;
 
 			ob_start();
-			
-			$myaddon_api_key = get_option($this->slug.'_api_key');
-			
-			if( $myaddon_api_key != '' ) {
+
+			$zapier_api_key = get_option($this->slug.'_api_key');
+
+			if( $zapier_api_key != '' ) {
 
 				// Your API call to make connection goes here
-            	// Make connection to MyAddon account
+            	// Make connection to Zapier account
             	// $result will have connection details
             	// This piece of code checks if API key/ credentials are changed
 
 				if( $result == false ) {
 					$formstyle = '';
-					$isKeyChanged = true;	
+					$isKeyChanged = true;
 				} else {
 					$formstyle = 'style="display:none;"';
 				}
@@ -111,22 +110,22 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 			}
             ?>
             <div class="bsf-cnlist-form-row" <?php echo $formstyle; ?> >
-				<label for="<?php echo $this->slug; ?>_api_key"><?php _e( $this->setting['name']." API Key", "smile" ); ?></label>            
-	            <input type="text" autocomplete="off" id="<?php echo $this->slug; ?>_api_key" name="<?php echo $this->slug; ?>-api-key" value="<?php echo esc_attr( $myaddon_api_key ); ?>"/>
+				<label for="<?php echo $this->slug; ?>_api_key"><?php _e( $this->setting['name']." API Key", "smile" ); ?></label>
+	            <input type="text" autocomplete="off" id="<?php echo $this->slug; ?>_api_key" name="<?php echo $this->slug; ?>-api-key" value="<?php echo esc_attr( $zapier_api_key ); ?>"/>
 	        </div>
-			
+
 			<div class="bsf-cnlist-form-row <?php echo $this->slug; ?>-list">
                 <?php
-                if( $myaddon_api_key != '' && !$isKeyChanged ) {
-                    $myaddon_lists = $this->get_myaddon_lists( $myaddon_api_key );
+                if( $zapier_api_key != '' && !$isKeyChanged ) {
+                    $zapier_lists = $this->get_zapier_lists( $zapier_api_key );
 
-                    if( !empty( $myaddon_lists ) ){
+                    if( !empty( $zapier_lists ) ){
                         $connected = true;
                     ?>
                     <label for="<?php echo $this->slug; ?>-list"><?php echo __( "Select List", "smile" ); ?></label>
                         <select id="<?php echo $this->slug; ?>-list" class="bsf-cnlist-select" name="<?php echo $this->slug; ?>-list">
                         <?php
-                        foreach($myaddon_lists as $id => $name) {
+                        foreach($zapier_lists as $id => $name) {
                         ?>
                         <option value="<?php echo $id; ?>"><?php echo $name; ?></option>
                         <?php
@@ -144,7 +143,7 @@ if(!class_exists('Smile_Mailer_Myaddon')){
             </div>
 
             <div class="bsf-cnlist-form-row">
-                <?php if( $myaddon_api_key == "" ) { ?>
+                <?php if( $zapier_api_key == "" ) { ?>
                     <button id="auth-<?php echo $this->slug; ?>" class="button button-secondary auth-button" disabled><?php _e( "Authenticate " . $this->setting['name'], "smile" ); ?></button><span class="spinner" style="float: none;"></span>
                 <?php } else {
                         if( $isKeyChanged ) {
@@ -169,15 +168,15 @@ if(!class_exists('Smile_Mailer_Myaddon')){
             echo json_encode($result);
             exit();
         }
-		
-		
+
+
 		/*
-		 * Function Name: update_myaddon_authentication
-		 * Function Description: Update MyAddon values to ConvertPlug
+		 * Function Name: update_zapier_authentication
+		 * Function Description: Update Zapier values to ConvertPlug
 		 */
-		
-		function update_myaddon_authentication(){
-			$myaddon_api_key = $_POST[$this->slug.'_api_key'];
+
+		function update_zapier_authentication(){
+			$zapier_api_key = $_POST[$this->slug.'_api_key'];
 			if( $_POST[$this->slug.'_api_key'] == "" ){
 				print_r(json_encode(array(
 					'status' => "error",
@@ -185,7 +184,7 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 				)));
 				exit();
 			}
-			
+
 			ob_start();
 			try{
 
@@ -199,7 +198,7 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 				)));
 				exit();
 			}
-			
+
 
 			if( /*success*/ )  {
 				if( $campaigns == '' ) {
@@ -249,11 +248,11 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 				)));
 				exit();
 			}
-			
+
 			$html = ob_get_clean();
 
-			update_option( $this->slug.'_api_key', $myaddon_api );
-			update_option( $this->slug.'_lists', $myaddon_lists );
+			update_option( $this->slug.'_api_key', $zapier_api );
+			update_option( $this->slug.'_lists', $zapier_lists );
 
 			print_r(json_encode(array(
 				'status' => "success",
@@ -262,41 +261,41 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 
 			exit();
 		}
-		
-		
+
+
 		/*
-		 * Function Name: myaddon_add_subscriber
+		 * Function Name: zapier_add_subscriber
 		 * Function Description: Add subscriber
 		 */
-		
-		function myaddon_add_subscriber(){
+
+		function zapier_add_subscriber(){
 			$ret = true;
 			$email_status = false;
             $style_id = isset( $_POST['style_id'] ) ? $_POST['style_id'] : '';
             $contact = $_POST['param'];
             $contact['source'] = ( isset( $_POST['source'] ) ) ? $_POST['source'] : '';
             $msg = isset( $_POST['message'] ) ? $_POST['message'] : __( 'Thanks for subscribing. Please check your mail and confirm the subscription.', 'smile' );
-			
+
 			//	Check Email in MX records
 			if( isset( $_POST['param']['email'] ) ) {
                 $email_status = ( !( isset( $_POST['only_conversion'] ) ? true : false ) ) ? apply_filters('cp_valid_mx_email', $_POST['param']['email'] ) : false;
             }
 
-			$myaddon_api_key = $_POST[$this->slug.'_api_key'];
-			
+			$zapier_api_key = $_POST[$this->slug.'_api_key'];
+
 			if( $email_status ) {
 				if( function_exists( "cp_add_subscriber_contact" ) ){
 					$isuserupdated = cp_add_subscriber_contact( $_POST['option'] , $contact );
 				}
 
 				if ( !$isuserupdated ) {  // if user is updated dont count as a conversion
-					// update conversions 
+					// update conversions
 					smile_update_conversions( $style_id );
 				}
 				if( isset( $_POST['param']['email'] ) ) {
 					$status = 'success';
 					try {
-						
+
 						// Your API call to add a subscriber to mailer goes here.
 						// Your API call to assign given list_id to the contact goes here.
 						// list_id is alloted to $_POST['list_id'] variable
@@ -333,7 +332,7 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 				}
 			} else {
 				if( isset( $_POST['only_conversion'] ) ? true : false ){
-					// update conversions 
+					// update conversions
 					$status = 'success';
 					smile_update_conversions( $style_id );
 					$ret = true;
@@ -357,13 +356,13 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 				exit();
         	}
 		}
-		
+
 		/*
-		* Function Name: disconnect_myaddon
+		* Function Name: disconnect_zapier
 		* Function Description: Disconnect current TotalSend from wp instance
 		*/
-		
-		function disconnect_myaddon(){
+
+		function disconnect_zapier(){
 			delete_option( $this->slug.'_api_key' );
 
 
@@ -389,16 +388,16 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 		}
 
 		/*
-		 * Function Name: get_myaddon_lists
-		 * Function Description: Get MyAddon Mailer Campaign list
+		 * Function Name: get_zapier_lists
+		 * Function Description: Get Zapier Mailer Campaign list
 		 */
 
-		function get_myaddon_lists( $myaddon_api_key = '' ) {
-			if( $myaddon_api_key != '' ) {
+		function get_zapier_lists( $zapier_api_key = '' ) {
+			if( $zapier_api_key != '' ) {
 
 				// Your API call to get all lists from mailer goes here.
 				// The array/object of mailer list is stored in $campaigns variable
-	        	
+
 				if( /*Success*/ )  {
 					$lists = array();
 					foreach($campaigns as $offset => $cm) {
@@ -413,6 +412,6 @@ if(!class_exists('Smile_Mailer_Myaddon')){
 			}
 		}
 	}
-	new Smile_Mailer_Myaddon;	
+	new Smile_Mailer_Zapier;
 }
 ?>
