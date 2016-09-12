@@ -37,7 +37,7 @@ if(!class_exists('Smile_Mailer_Zapier')){
 			// Settings for mailer
 			$this->setting  = array(
 				'name' => 'Zapier', //Display name
-				'parameters' => array( 'webook_url' ), // Credentials input parameters
+				'parameters' => array(),
 				'where_to_find_url' => 'https://zapier.com/',
 				'logo_url' => plugins_url('images/logo.png', __FILE__)
 			);
@@ -85,79 +85,15 @@ if(!class_exists('Smile_Mailer_Zapier')){
 		 */
 
 		function get_zapier_data(){
-			$isKeyChanged = false;
-			$connected = false;
+			$connected = true;
 
 			ob_start();
-
-			$zapier_api_key = get_option($this->slug.'_api_key');
-
-			if( $zapier_api_key != '' ) {
-
-				// Your API call to make connection goes here
-            	// Make connection to Zapier account
-            	// $result will have connection details
-            	// This piece of code checks if API key/ credentials are changed
-
-				if( $result == false ) {
-					$formstyle = '';
-					$isKeyChanged = true;
-				} else {
-					$formstyle = 'style="display:none;"';
-				}
-			} else {
-            	$formstyle = '';
-			}
             ?>
-            <div class="bsf-cnlist-form-row" <?php echo $formstyle; ?> >
-				<label for="<?php echo $this->slug; ?>_api_key"><?php _e( $this->setting['name']." API Key", "smile" ); ?></label>
-	            <input type="text" autocomplete="off" id="<?php echo $this->slug; ?>_api_key" name="<?php echo $this->slug; ?>-api-key" value="<?php echo esc_attr( $zapier_api_key ); ?>"/>
-	        </div>
 
-			<div class="bsf-cnlist-form-row <?php echo $this->slug; ?>-list">
-                <?php
-                if( $zapier_api_key != '' && !$isKeyChanged ) {
-                    $zapier_lists = $this->get_zapier_lists( $zapier_api_key );
-
-                    if( !empty( $zapier_lists ) ){
-                        $connected = true;
-                    ?>
-                    <label for="<?php echo $this->slug; ?>-list"><?php echo __( "Select List", "smile" ); ?></label>
-                        <select id="<?php echo $this->slug; ?>-list" class="bsf-cnlist-select" name="<?php echo $this->slug; ?>-list">
-                        <?php
-                        foreach($zapier_lists as $id => $name) {
-                        ?>
-                        <option value="<?php echo $id; ?>"><?php echo $name; ?></option>
-                        <?php
-                        }
-                        ?>
-                        </select>
-                        <?php
-                    } else {
-                    ?>
-                        <label for="<?php echo $this->slug; ?>-list"><?php echo __( "You need at least one list added in " . $this->setting['name'] . " before proceeding.", "smile" ); ?></label>
-                    <?php
-                    }
-                }
-                ?>
-            </div>
-
-            <div class="bsf-cnlist-form-row">
-                <?php if( $zapier_api_key == "" ) { ?>
-                    <button id="auth-<?php echo $this->slug; ?>" class="button button-secondary auth-button" disabled><?php _e( "Authenticate " . $this->setting['name'], "smile" ); ?></button><span class="spinner" style="float: none;"></span>
-                <?php } else {
-                        if( $isKeyChanged ) {
-                ?>
-                    <div id="update-<?php echo $this->slug; ?>" class="update-mailer" data-mailerslug="<?php echo $this->setting['name']; ?>" data-mailer="<?php echo $this->slug; ?>"><span><?php _e( "Your credentials seems to be changed.</br>Use different '". $this->setting['name'] ."' credentials?", "smile" ); ?></span></div><span class="spinner" style="float: none;"></span>
-                <?php
-                        } else {
-                ?>
-                    <div id="disconnect-<?php echo $this->slug; ?>" class="button button-secondary" data-mailerslug="<?php echo $this->setting['name']; ?>" data-mailer="<?php echo $this->slug; ?>"><span><?php _e( "Use different '".$this->setting['name']."' account?", "smile" ); ?></span></div><span class="spinner" style="float: none;"></span>
-                <?php
-                        }
-                ?>
-                <?php } ?>
-            </div>
+						<div class="bsf-cnlist-form-row <?php echo $this->slug; ?>-list">
+						  <label for="<?php echo $this->slug; ?>-list"><?php echo __( "Zapier Webook URL", "smile" ); ?></label>
+						  <input type="text" id="<?php echo $this->slug; ?>-list" name="<?php echo $this->slug; ?>-list" />
+						</div>
 
             <?php
             $content = ob_get_clean();
@@ -176,83 +112,16 @@ if(!class_exists('Smile_Mailer_Zapier')){
 		 */
 
 		function update_zapier_authentication(){
-			$zapier_api_key = $_POST[$this->slug.'_api_key'];
-			if( $_POST[$this->slug.'_api_key'] == "" ){
-				print_r(json_encode(array(
-					'status' => "error",
-					'message' => __( "Please provide valid API Key for your " . $this->setting['name'] . " account.", "smile" )
-				)));
-				exit();
-			}
-
 			ob_start();
-			try{
-
-				// Your bussiness logic / API call goes here.
-				// $campaigns has the list array/object returned from API call.
-
-			} catch( Exception $ex ){
-				print_r(json_encode(array(
-					'status' => "error",
-					'message' => 'Error message goes here.'
-				)));
-				exit();
-			}
-
-
-			if( /*success*/ )  {
-				if( $campaigns == '' ) {
-					 print_r(json_encode(array(
-	                    'status' => "error",
-	                    'message' => __( "You have zero lists in your " . $this->setting['name'] . " account. You must have at least one list before integration." , "smile" )
-	                )));
-	                exit();
-				}
-
-				if( $campaigns != '' ) {
 					$query = '';
 				?>
-				<label for="<?php echo $this->slug; ?>-list">Select List</label>
-				<select id="<?php echo $this->slug; ?>-list" class="bsf-cnlist-select" name="<?php echo $this->slug; ?>-list">
-				<?php
-					foreach ($campaigns as $key => $cm) {
-						$query .= $cm['id'].'|'.$cm['name'].',';
-						$constContact_lists[$cm['id']] = $cm['name'];
-				?>
-					<option value="<?php echo $cm['id']; ?>"><?php echo $cm['name']; ?></option>
-				<?php
-					}
-				?>
-				</select>
+				<label for="<?php echo $this->slug; ?>-list"><?php echo __( "Zapier Webook URL", "smile" ); ?></label>
+				<input type="text" id="<?php echo $this->slug; ?>-list" name="<?php echo $this->slug; ?>-list" />
 				<input type="hidden" id="mailer-all-lists" value="<?php echo $query; ?>"/>
 				<input type="hidden" id="mailer-list-action" value="update_<?php echo $this->slug; ?>_list"/>
-				<div class="bsf-cnlist-form-row">
-					<div id="disconnect-<?php echo $this->slug; ?>" class="" data-mailerslug="<?php echo $this->setting['name']; ?>" data-mailer="<?php echo $this->slug; ?>">
-						<span>
-							<?php _e( "Use different '" . $this->setting['name'] . "' account?", "smile" ); ?>
-						</span>
-					</div>
-					<span class="spinner" style="float: none;"></span>
-				</div>
 				<?php
-				} else {
-				?>
-					<label for="<?php echo $this->slug; ?>-list"><?php echo __( "You need at least one list added in " . $this->setting['name'] . " before proceeding.", "smile" ); ?></label>
-				<?php
-				}
-
-			} else {
-				print_r(json_encode(array(
-					'status' => "error",
-					'message' => "Error message goes here."
-				)));
-				exit();
-			}
 
 			$html = ob_get_clean();
-
-			update_option( $this->slug.'_api_key', $zapier_api );
-			update_option( $this->slug.'_lists', $zapier_lists );
 
 			print_r(json_encode(array(
 				'status' => "success",
@@ -276,12 +145,18 @@ if(!class_exists('Smile_Mailer_Zapier')){
             $contact['source'] = ( isset( $_POST['source'] ) ) ? $_POST['source'] : '';
             $msg = isset( $_POST['message'] ) ? $_POST['message'] : __( 'Thanks for subscribing. Please check your mail and confirm the subscription.', 'smile' );
 
+            if ( is_user_logged_in() && current_user_can( 'access_cp' ) ) {
+                $default_error_msg = __( 'THERE APPEARS TO BE AN ERROR WITH THE CONFIGURATION.', 'smile' );
+            } else {
+                $default_error_msg = __( 'THERE WAS AN ISSUE WITH YOUR REQUEST. Administrator has been notified already!', 'smile' );
+            }
+
+			$zapier_list_id = $_POST['list_id'];
+
 			//	Check Email in MX records
 			if( isset( $_POST['param']['email'] ) ) {
                 $email_status = ( !( isset( $_POST['only_conversion'] ) ? true : false ) ) ? apply_filters('cp_valid_mx_email', $_POST['param']['email'] ) : false;
             }
-
-			$zapier_api_key = $_POST[$this->slug.'_api_key'];
 
 			if( $email_status ) {
 				if( function_exists( "cp_add_subscriber_contact" ) ){
@@ -290,58 +165,95 @@ if(!class_exists('Smile_Mailer_Zapier')){
 
 				if ( !$isuserupdated ) {  // if user is updated dont count as a conversion
 					// update conversions
-					smile_update_conversions( $style_id );
+					smile_update_conversions($style_id);
 				}
 				if( isset( $_POST['param']['email'] ) ) {
 					$status = 'success';
-					try {
+					$errorMsg =  '';
 
-						// Your API call to add a subscriber to mailer goes here.
-						// Your API call to assign given list_id to the contact goes here.
-						// list_id is alloted to $_POST['list_id'] variable
+					$ch = curl_init( $zapier_list_id );
 
-					} catch ( Exception $ex ) {
+					curl_setopt( $ch,CURLOPT_POST, 2 );
+					curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $_POST['param'] ) );
+					curl_setopt( $ch, CURLOPT_FAILONERROR, 1 );
+					curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+					curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0 );
+
+					$response = curl_exec($ch);
+					$http_response_error = curl_error($ch);
+
+					if( $http_response_error != '' )  {
 						if( isset( $_POST['source'] ) ) {
 			        		return false;
 			        	} else {
+			        		//var_dump($http_response_error);
+			        		if(strpos($http_response_error, '404')){
+			        			$errorMsg =  __('ListId is not present', 'smile' );
+			        		}else{
+			        			$errorMsg = $http_response_error;
+			        		}
+
+			        		if ( is_user_logged_in() && current_user_can( 'access_cp' ) ) {
+				                $detailed_msg = $errorMsg;
+				            } else {
+				                $detailed_msg = '';
+				            }
+				            if( $detailed_msg !== '' & $detailed_msg !== null ) {
+				                $page_url = isset( $_POST['cp-page-url'] ) ? $_POST['cp-page-url'] : '';
+
+				                // notify error message to admin
+				                if( function_exists('cp_notify_error_to_admin') ) {
+				                    $result   = cp_notify_error_to_admin($page_url);
+				                }
+				            }
+
 			        		print_r(json_encode(array(
 								'action' => ( isset( $_POST['message'] ) ) ? 'message' : 'redirect',
 								'email_status' => $email_status,
 								'status' => 'error',
-								'message' => __( "Something went wrong. Please try again.", "smile" ),
+								'message' => $default_error_msg,
+								'detailed_msg' => $detailed_msg,
 								'url' => ( isset( $_POST['message'] ) ) ? 'none' : $_POST['redirect'],
 							)));
 							exit();
 			        	}
-					}
 
-					if( /* Failes */ )  {
-						if( isset( $_POST['source'] ) ) {
-			        		return false;
-			        	} else {
-			        		print_r(json_encode(array(
-								'action' => ( isset( $_POST['message'] ) ) ? 'message' : 'redirect',
-								'email_status' => $email_status,
-								'status' => 'error',
-								'message' => __( "Something went wrong. Please try again.", "smile" ),
-								'url' => ( isset( $_POST['message'] ) ) ? 'none' : $_POST['redirect'],
-							)));
-							exit();
-			        	}
 					}
 				}
+
 			} else {
 				if( isset( $_POST['only_conversion'] ) ? true : false ){
 					// update conversions
 					$status = 'success';
 					smile_update_conversions( $style_id );
 					$ret = true;
-				} else {
-					$msg = ( isset( $_POST['msg_wrong_email']  )  && $_POST['msg_wrong_email'] !== '' ) ? $_POST['msg_wrong_email'] : __( 'Please enter correct email address.', 'smile' );
-					$status = 'error';
-					$ret = false;
-				}
+				} else if( isset( $_POST['param']['email'] ) ) {
+                    $msg = ( isset( $_POST['msg_wrong_email']  )  && $_POST['msg_wrong_email'] !== '' ) ? $_POST['msg_wrong_email'] : __( 'Please enter correct email address.', 'smile' );
+                    $status = 'error';
+                    $ret = false;
+                } else if( !isset( $_POST['param']['email'] ) ) {
+                    //$msg = __( 'Something went wrong. Please try again.', 'smile' );
+                    $msg  = $default_error_msg;
+                    $errorMsg = __( 'Email field is mandatory to set in form.', 'smile' );
+                    $status = 'error';
+                }
 			}
+
+			if ( is_user_logged_in() && current_user_can( 'access_cp' ) ) {
+                $detailed_msg = $errorMsg;
+            } else {
+                $detailed_msg = '';
+            }
+
+            if( $detailed_msg !== '' & $detailed_msg !== null ) {
+                $page_url = isset( $_POST['cp-page-url'] ) ? $_POST['cp-page-url'] : '';
+
+                // notify error message to admin
+                if( function_exists('cp_notify_error_to_admin') ) {
+                    $result   = cp_notify_error_to_admin($page_url);
+                }
+            }
+
 			if( isset( $_POST['source'] ) ) {
         		return $ret;
         	} else {
@@ -350,22 +262,19 @@ if(!class_exists('Smile_Mailer_Zapier')){
 					'email_status' => $email_status,
 					'status' => $status,
 					'message' => $msg,
+					'detailed_msg' => $detailed_msg,
 					'url' => ( isset( $_POST['message'] ) ) ? 'none' : $_POST['redirect'],
 				)));
-
 				exit();
         	}
 		}
 
 		/*
 		* Function Name: disconnect_zapier
-		* Function Description: Disconnect current TotalSend from wp instance
+		* Function Description: Disconnect current Zapier from wp instance
 		*/
 
 		function disconnect_zapier(){
-			delete_option( $this->slug.'_api_key' );
-
-
 			$smile_lists = get_option('smile_lists');
 			if( !empty( $smile_lists ) ){
 				foreach( $smile_lists as $key => $list ) {
@@ -385,31 +294,6 @@ if(!class_exists('Smile_Mailer_Zapier')){
                 'message' => "disconnected",
 			)));
 			die();
-		}
-
-		/*
-		 * Function Name: get_zapier_lists
-		 * Function Description: Get Zapier Mailer Campaign list
-		 */
-
-		function get_zapier_lists( $zapier_api_key = '' ) {
-			if( $zapier_api_key != '' ) {
-
-				// Your API call to get all lists from mailer goes here.
-				// The array/object of mailer list is stored in $campaigns variable
-
-				if( /*Success*/ )  {
-					$lists = array();
-					foreach($campaigns as $offset => $cm) {
-						$lists[$cm['id']] = $cm['name'];
-					}
-					return $lists;
-				} else {
-					return array();
-				}
-			} else {
-				return array();
-			}
 		}
 	}
 	new Smile_Mailer_Zapier;
