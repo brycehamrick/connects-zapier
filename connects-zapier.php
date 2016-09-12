@@ -24,9 +24,6 @@ if(!class_exists('Smile_Mailer_Zapier')){
 		function __construct(){
 			add_action( 'admin_init', array( $this, 'enqueue_scripts' ) );
 
-			// API libraries if any
-			require_once('lib/api.class.php');
-
 			// Actions to perform get lists, add subscriber, disconnect mailer, etc.
 			add_action( 'wp_ajax_get_zapier_data', array($this,'get_zapier_data' ));
 			add_action( 'wp_ajax_update_zapier_authentication', array($this,'update_zapier_authentication' ));
